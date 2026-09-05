@@ -1,241 +1,775 @@
-# CapitalGuard
+CapitalGuard
 
-> **Smart Capital Allocation. Real-Time Risk Control.**
+Smart Capital Allocation. Real-Time Risk Control.
 
-CapitalGuard is an institutional-grade FinTech decision-support and simulation platform built for financial officers, portfolio managers, risk committees, and institutional allocators. It transforms passive portfolio monitoring into an active closed-loop risk mitigation engine:
+<p align="center">
+  <img src="assets/capitalguard-loop.gif" alt="CapitalGuard closed-loop risk control animation" width="100%">
+</p>
 
-$$\textbf{OBSERVE} \longrightarrow \textbf{ANALYZE} \longrightarrow \textbf{DETECT} \longrightarrow \textbf{OPTIMIZE} \longrightarrow \textbf{RESPOND} \longrightarrow \textbf{EXPLAIN} \longrightarrow \textbf{RECORD}$$
+<p align="center">
+  <b>A practical FinTech decision-support and portfolio risk simulation platform.</b><br>
+  Built to turn market signals into measurable, explainable capital decisions.
+</p>
 
-CapitalGuard continuously answers:
-> *"Given our current capital, portfolio allocation, market conditions, risk limits, liquidity requirements, and investment constraints, what is the safest and most efficient allocation of capital right now?"*
+<p align="center">
+  <a href="#-what-is-capitalguard">What is it?</a> •
+  <a href="#-key-features">Features</a> •
+  <a href="#-how-it-works">How it works</a> •
+  <a href="#-quick-start">Quick start</a> •
+  <a href="#-demo-flow">Demo</a>
+</p>
 
----
+🎯 What is CapitalGuard?
 
-## 1. Problem Statement
+CapitalGuard is a FinTech decision-support and simulation platform for portfolio managers, financial officers, risk teams, and institutional allocators.
 
-Financial institutions manage capital across dynamic asset classes. During volatile market regimes, manual portfolio rebalancing and static risk controls result in:
-- **Delayed Intervention**: Latency in recognizing cross-asset contagion.
-- **Concentration Vulnerability**: Overweight positions in high-beta assets.
-- **Liquidity Mismatches**: Inability to meet redemption pressure without fire sales.
-- **Excessive Turnover Friction**: Unnecessary rebalancing costs degrading net fund returns.
-- **Lack of Explainability**: Risk alerts that say "risk is high" without transparent mathematical attribution or actionable defensive steps.
+The idea is simple:
 
-## 2. Solution: Closed-Loop Autonomous Sentinel
+Don't wait for risk to become a problem. Detect it, understand it, optimize around it, and record the decision.
 
-CapitalGuard automates the full risk-control cycle:
-1. **Continuous Mark-to-Market Monitoring**: Correlated price drift across equities, sovereign debt, corporate credit, gold, REITs, and cash.
-2. **Real Mathematical Optimization**: Constrained Mean-Variance Sequential Least Squares Programming (SLSQP) that penalizes portfolio variance and turnover transaction costs under hard liquidity and concentration constraints.
-3. **Transparent 4-Factor Risk Scoring**: Zero black-box numbers. Explicit breakdown across Volatility, Tail VaR, Concentration (HHI), and Liquidity Deficit.
-4. **Autonomous Stress Testing**: Predefined benchmark shocks (Market Crash, Recession, Interest Rate Shock, Inflation Shock, Liquidity Freeze) and custom multi-asset sliders.
-5. **One-Click Market Crash Hackathon Demo (⚡ SIMULATE MARKET CRASH)**: Instant closed-loop demonstration from market shock through price impact, risk spike, alert generation, defensive optimization, 5-point explainability rationale, and audit trail commit.
-6. **Simulated Rebalancing Orders**: Real ₹ buy/sell order sizes and transaction friction calculated dynamically.
+CapitalGuard follows a closed-loop workflow:
 
----
+OBSERVE → ANALYZE → DETECT → OPTIMIZE → RESPOND → EXPLAIN → RECORD
 
-## 3. Technology Stack
+Instead of showing a risk number and leaving the user to figure out what it means, the platform connects portfolio data, market shocks, risk limits, liquidity requirements, optimization, and explainable recommendations in one workflow.
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Recharts, Lucide React |
-| **Backend** | Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy, Uvicorn |
-| **Quantitative Engine** | NumPy, Pandas, SciPy (`scipy.optimize.minimize` SLSQP), SciPy Stats |
-| **Database** | SQLite (development/hackathon), schema ready for PostgreSQL |
-| **DevOps & Deploy** | Multi-stage Docker, Docker Compose, PostCSS, Autoprefixer |
+Core question:
+Given our current capital, allocation, market conditions, risk limits, liquidity requirements, and investment constraints, what is the safest and most efficient allocation right now?
 
----
+💡 Why we built it
 
-## 4. Financial Methodology & Formulas
+Managing a portfolio becomes difficult when markets move quickly.
 
-### 4.1 Expected Portfolio Return
-$$R_p = \sum_{i=1}^n w_i R_i = \mathbf{w}^T \mathbf{R}$$
+A portfolio can look healthy one minute and become exposed to concentration, liquidity, or volatility risk after a sudden market move. Manual rebalancing can also introduce unnecessary transaction costs.
 
-### 4.2 Portfolio Variance & Annualized Volatility
-$$\sigma_p^2 = \mathbf{w}^T \mathbf{\Sigma} \mathbf{w}, \quad \sigma_p = \sqrt{\max(0, \mathbf{w}^T \mathbf{\Sigma} \mathbf{w})}$$
-where $\mathbf{\Sigma}_{ij} = \rho_{ij} \sigma_i \sigma_j$ is the institutional covariance matrix.
+CapitalGuard is designed around five practical problems:
 
-### 4.3 Sharpe Ratio
-$$\text{Sharpe} = \frac{R_p - R_f}{\sigma_p}$$
-using configurable sovereign risk-free rate $R_f = 6.50\%$.
+Delayed intervention — important changes can be missed while teams manually review portfolios.
 
-### 4.4 Parametric Value at Risk (VaR) & Expected Shortfall (CVaR)
-$$\text{VaR}_\alpha = Z_\alpha \sigma_p - R_p$$
-$$\text{CVaR}_\alpha = \frac{\phi(Z_\alpha)}{1 - \alpha} \sigma_p - R_p$$
-where $\alpha = 0.95$ ($Z = 1.645$) or $0.99$ ($Z = 2.326$).
+Concentration risk — an oversized position can quietly dominate portfolio risk.
 
-### 4.5 Constrained SLSQP Optimization Formulation
-$$\min_{\mathbf{w}} \left[ \lambda \mathbf{w}^T \mathbf{\Sigma} \mathbf{w} - \mathbf{w}^T \mathbf{R} + \kappa \sum_{i=1}^n |w_i - w_{i, \text{curr}}| \cdot c \right]$$
-**Subject to:**
-1. $\sum_{i=1}^n w_i = 1.0$ (Full Investment)
-2. $w_{\min, i} \le w_i \le w_{\max, i}$ (Asset Bounds)
-3. $\sigma_p \le \text{MaxVolatility}$ (Policy Volatility Ceiling)
-4. $\sum_{i=1}^n w_i L_i \ge \text{MinLiquidity}$ (Liquidity Buffer Floor)
-5. $\max_i(w_i) \le \text{MaxConcentration}$ (Idiosyncratic Exposure Cap)
+Liquidity pressure — selling the wrong assets during stress can make a bad situation worse.
 
-Profiles:
-- **Conservative**: $\lambda = 6.0$, Max Volatility $11.0\%$, Min Liquidity $32.0\%$, Max Equity $22.0\%$
-- **Balanced**: $\lambda = 3.0$, Max Volatility $14.5\%$, Min Liquidity $25.0\%$, Max Equity $32.0\%$
-- **Aggressive**: $\lambda = 1.2$, Max Volatility $18.0\%$, Min Liquidity $18.0\%$, Max Equity $45.0\%$
+Turnover costs — constantly rebalancing can reduce net returns.
 
----
+Poor explainability — a warning is not very useful unless the user knows why it happened and what to do next.
 
-## 5. Architectural Diagram
+🚀 Key Features
 
-```
-+-------------------------------------------------------------------------+
-|                  React 18 + Vite Terminal Frontend                      |
-| (KPIs, Donut Chart, Risk Heatmap, Decision Timeline, Crash Simulator)   |
-+------------------------------------+------------------------------------+
-                                     | REST (JSON)
-+------------------------------------v------------------------------------+
-|                         FastAPI Backend                                 |
-|   /api/portfolio  /api/optimization  /api/risk  /api/stress-test        |
-+----------+-------------------------+-----------------------+------------+
-           |                         |                       |
-+----------v---------+     +---------v---------+   +---------v------------+
-| Quantitative Engine|     | Optimization      |   | Closed-Loop Sentinel |
-| NumPy + SciPy      |     | SLSQP Solver      |   | 5-Point Explainable  |
-| Covariance, VaR    |     | Constraints + Tx  |   | Decision Logger      |
-+----------+---------+     +---------+---------+   +---------+------------+
-           |                         |                       |
-+----------v-------------------------v-----------------------v------------+
-|                 SQLAlchemy ORM + SQLite / PostgreSQL                    |
-|   Assets, Portfolios, Holdings, RiskPolicies, Alerts, Decisions         |
-+-------------------------------------------------------------------------+
-```
+📊 Portfolio Monitoring
 
----
+See the important portfolio numbers in one place:
 
-## 6. Seed Portfolio Baseline
+Total capital
 
-Initial Capital: **₹10.00 Crore (₹100,000,000)**
+Expected return
 
-| Asset Class | Symbol | Allocation | Value | Expected Return | Volatility | Liquidity | Policy Limit |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Core Large-Cap Equities** | `EQUITY` | **42.0%** | ₹4.20 Cr | 16.0% | 22.0% | 92% | 35.0% *(Breached)* |
-| **Government Bonds (10Y G-Sec)** | `GBOND` | **25.0%** | ₹2.50 Cr | 7.2% | 5.5% | 98% | 50.0% |
-| **Corporate AAA Bonds** | `CBOND` | **12.0%** | ₹1.20 Cr | 8.8% | 9.0% | 75% | 30.0% |
-| **Physical Gold ETF Reserve** | `GOLD` | **8.0%** | ₹80 Lakh | 9.5% | 14.5% | 88% | 20.0% |
-| **Commercial REITs** | `REIT` | **5.0%** | ₹50 Lakh | 10.5% | 16.5% | 65% | 15.0% |
-| **Cash & Liquid Equivalents** | `CASH` | **8.0%** | ₹80 Lakh | 5.5% | 1.0% | 100% | 40.0% |
+Portfolio volatility
 
-*Note: Initial Equity (42%) is seeded slightly above the 35% concentration threshold to provide immediate live risk context upon first launch.*
+Sharpe ratio
 
----
+Value at Risk (VaR)
 
-## 7. Installation & Quick Start
+Expected Shortfall / CVaR
 
-### Prerequisites
-- Python 3.11+
-- Node.js 18+ and npm
+Concentration
 
-### Local Development
+Liquidity
 
-#### 1. Backend Setup
-```bash
+Asset-level exposure
+
+🧠 Constrained Portfolio Optimization
+
+CapitalGuard uses constrained mean-variance optimization with SLSQP to find a better allocation while respecting real portfolio rules.
+
+The optimizer can account for:
+
+Asset allocation bounds
+
+Portfolio volatility ceilings
+
+Liquidity floors
+
+Concentration limits
+
+Current holdings
+
+Rebalancing / transaction friction
+
+The goal is not simply to maximize return.
+
+The goal is to find a practical risk-adjusted allocation under constraints.
+
+🛡️ Explainable Risk Scoring
+
+Risk is broken down into understandable factors instead of presenting one unexplained score:
+
+Volatility
+
+Tail VaR
+
+Concentration (HHI)
+
+Liquidity deficit
+
+This makes the reason behind a warning or critical state easier to understand.
+
+🌪️ Stress Testing
+
+Test the portfolio before a scenario becomes reality.
+
+Built-in scenarios include:
+
+Market Crash
+
+Recession
+
+Interest Rate Shock
+
+Inflation Shock
+
+Liquidity Freeze
+
+You can also test custom multi-asset shocks.
+
+⚡ One-Click Market Crash Demo
+
+For the hackathon demo, the SIMULATE MARKET CRASH action demonstrates the complete control loop:
+
+Market shock → Portfolio impact → Risk spike → Alert → Defensive optimization → Explanation → Decision record
+
+It is intentionally designed to make the system's value visible in a short live demonstration.
+
+🔄 Simulated Rebalancing
+
+The platform calculates simulated buy/sell orders in ₹ and includes transaction friction so that recommendations are closer to a practical portfolio-management workflow.
+
+🧾 Decision History
+
+Important optimization, stress, and market-shock events can be recorded with:
+
+Trigger
+
+Before/after metrics
+
+Recommended action
+
+Explanation
+
+Timestamp
+
+This creates a clear audit trail for the simulation.
+
+🔁 How it works
+
+┌─────────┐
+│ OBSERVE │  Market & portfolio data
+└────┬────┘
+     ↓
+┌─────────┐
+│ ANALYZE │  Returns, volatility, liquidity, exposure
+└────┬────┘
+     ↓
+┌────────┐
+│ DETECT │  Check risk policies & thresholds
+└────┬───┘
+     ↓
+┌──────────┐
+│ OPTIMIZE │  Find a constrained allocation
+└────┬─────┘
+     ↓
+┌─────────┐
+│ RESPOND │  Generate simulated rebalance
+└────┬────┘
+     ↓
+┌─────────┐
+│ EXPLAIN │  Show why the recommendation was made
+└────┬────┘
+     ↓
+┌────────┐
+│ RECORD │  Save the decision / audit event
+└────────┘
+
+The animated banner above gives the same idea a more interactive feel.
+
+🧮 Financial Methodology
+
+CapitalGuard uses transparent quantitative formulas.
+
+Expected portfolio return
+
+$$R_p = \sum_{i=1}^{n} w_iR_i = \mathbf{w}^T\mathbf{R}$$
+
+Portfolio variance and volatility
+
+$$\sigma_p^2 = \mathbf{w}^T\mathbf{\Sigma}\mathbf{w}$$
+
+$$\sigma_p = \sqrt{\max(0,\mathbf{w}^T\mathbf{\Sigma}\mathbf{w})}$$
+
+where:
+
+$$\mathbf{\Sigma}{ij}=\rho{ij}\sigma_i\sigma_j$$
+
+Sharpe ratio
+
+$$\text{Sharpe}=\frac{R_p-R_f}{\sigma_p}$$
+
+The current methodology uses a configurable sovereign risk-free rate of 6.50%.
+
+Parametric VaR and CVaR
+
+$$\text{VaR}{\alpha}=Z{\alpha}\sigma_p-R_p$$
+
+$$\text{CVaR}{\alpha}=\frac{\phi(Z{\alpha})}{1-\alpha}\sigma_p-R_p$$
+
+Supported confidence levels include 95% and 99%.
+
+Optimization objective
+
+The constrained optimizer minimizes a combination of portfolio variance, expected return, and turnover cost:
+
+\mathbf{w}^T\mathbf{R}
++
+\kappa\sum_i|w_i-w_{i,current}|c
+\right]
+$$
+
+Subject to:
+
+Full investment: $\sum_iw_i=1$
+
+Asset minimum/maximum bounds
+
+Maximum portfolio volatility
+
+Minimum liquidity
+
+Maximum concentration
+
+Risk profiles
+
+Profile
+
+Risk aversion λ
+
+Max volatility
+
+Min liquidity
+
+Max equity
+
+Conservative
+
+6.0
+
+11.0%
+
+32.0%
+
+22.0%
+
+Balanced
+
+3.0
+
+14.5%
+
+25.0%
+
+32.0%
+
+Aggressive
+
+1.2
+
+18.0%
+
+18.0%
+
+45.0%
+
+🏗️ Architecture
+
+┌──────────────────────────────────────────────────────────────┐
+│                    React + Vite Frontend                    │
+│ Dashboard • Portfolio • Risk • Optimization • Simulation   │
+└─────────────────────────────┬────────────────────────────────┘
+                              │ REST / JSON
+                              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                       FastAPI Backend                        │
+│ Portfolio • Optimization • Risk • Stress Test • Simulation │
+└───────────────┬──────────────────┬───────────────────────────┘
+                │                  │
+                ▼                  ▼
+      ┌─────────────────┐  ┌─────────────────────────┐
+      │ Quant Engine    │  │ Closed-Loop Risk Engine │
+      │ NumPy / SciPy   │  │ Detect • Respond • Log  │
+      │ VaR / Covariance│  │ Explainable Decisions   │
+      └────────┬────────┘  └────────────┬────────────┘
+               └──────────────┬─────────┘
+                              ▼
+                 ┌────────────────────────┐
+                 │ SQLAlchemy + Database  │
+                 │ SQLite / PostgreSQL    │
+                 └────────────────────────┘
+
+🧰 Technology Stack
+
+Layer
+
+Technology
+
+Frontend
+
+React, TypeScript, Vite, Tailwind CSS
+
+UI & Charts
+
+Recharts, Lucide React
+
+Backend
+
+Python, FastAPI, Pydantic, SQLAlchemy, Uvicorn
+
+Quantitative Engine
+
+NumPy, Pandas, SciPy
+
+Optimization
+
+scipy.optimize.minimize with SLSQP
+
+Development DB
+
+SQLite
+
+Production-ready DB direction
+
+PostgreSQL
+
+Deployment
+
+Docker, Docker Compose
+
+Testing
+
+Pytest
+
+💼 Seed Portfolio
+
+The current development/demo baseline starts with ₹10.00 Crore.
+
+Asset Class
+
+Allocation
+
+Expected Return
+
+Volatility
+
+Liquidity
+
+Policy Limit
+
+Core Large-Cap Equities
+
+42%
+
+16.0%
+
+22.0%
+
+92%
+
+35%
+
+Government Bonds
+
+25%
+
+7.2%
+
+5.5%
+
+98%
+
+50%
+
+Corporate AAA Bonds
+
+12%
+
+8.8%
+
+9.0%
+
+75%
+
+30%
+
+Physical Gold ETF
+
+8%
+
+9.5%
+
+14.5%
+
+88%
+
+20%
+
+Commercial REITs
+
+5%
+
+10.5%
+
+16.5%
+
+65%
+
+15%
+
+Cash & Liquid Equivalents
+
+8%
+
+5.5%
+
+1.0%
+
+100%
+
+40%
+
+The 42% equity allocation intentionally starts above the 35% concentration limit so the risk-control workflow has something meaningful to detect during the demo.
+
+⚙️ Quick Start
+
+Prerequisites
+
+Make sure you have:
+
+Python 3.11+
+
+Node.js 18+
+
+npm
+
+Git
+
+1. Start the backend
+
 cd backend
 python -m pip install -r requirements.txt
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-API Documentation: [http://localhost:8000/docs](http://localhost:8000/docs)  
-Health Check: [http://localhost:8000/health](http://localhost:8000/health)
 
-#### 2. Frontend Setup
-```bash
+Backend:
+
+API: http://localhost:8000
+
+Swagger docs: http://localhost:8000/docs
+
+Health check: http://localhost:8000/health
+
+2. Start the frontend
+
+Open a second terminal:
+
 cd frontend
 npm install
 npm run dev
-```
-Terminal UI: [http://localhost:5173](http://localhost:5173)
 
----
+Frontend:
 
-## 8. Docker Deployment
+http://localhost:5173
 
-Launch the complete full-stack platform with a single command:
-```bash
+🐳 Run with Docker
+
+If Docker is installed:
+
 docker compose up --build
-```
-Access the application on [http://localhost:8000](http://localhost:8000).
 
----
+Then open the application using the port exposed by the Docker Compose configuration.
 
-## 9. Automated Testing
+🧪 Testing
 
-CapitalGuard includes an automated `pytest` test suite verifying financial math, optimizer constraints, risk transitions, and API endpoints:
-```bash
+Run the backend test suite:
+
 cd backend
 python -m pytest tests/ -v
-```
-Verified Test Cases:
-- `test_financial_calculations`: Verifies return, covariance matrix, volatility, Sharpe ratio, VaR 95%, CVaR 95%, and HHI.
-- `test_optimization_weights_and_constraints`: Verifies allocations sum to 100%, risk profiles adjust equity weight, and transaction costs compute.
-- `test_risk_status_transitions`: Verifies policy triggers for NORMAL, WARNING, CRITICAL states.
-- `test_market_crash_closed_loop`: Verifies the full closed loop from shock to alert to decision log.
 
----
+The test suite covers the core areas of the system, including:
 
-## 10. Hackathon 2-Minute Live Presentation Flow
+Financial calculations
 
-1. **Dashboard Baseline (30s)**:
-   - Point out the **₹10.00 Cr** capital baseline, **12.40%** expected return, **14.20%** volatility, **27%** liquidity, and the **Status: WARNING** pill triggered by the 42% Equity position exceeding the 35% concentration limit.
-   - Highlight the **Closed-Loop Ribbon** visualizing: `MARKET → MONITOR → DETECT → OPTIMIZE → RESPOND → EXPLAIN → RECORD`.
+Covariance and volatility
 
-2. **Run Portfolio Optimization (30s)**:
-   - Navigate to **Optimization**, select **Balanced** profile.
-   - Click **RUN OPTIMIZATION**.
-   - Show the Before vs After table: Volatility drops to 13.8%, Sharpe rises to 1.38, and exact ₹ buy/sell orders are calculated.
-   - Showcase the **WHY THIS ALLOCATION?** 5-point explanation.
+Sharpe ratio
 
-3. **Simulate Market Crash Live Demo (45s)**:
-   - Return to **Dashboard** and click **⚡ SIMULATE MARKET CRASH**.
-   - The multi-step animated pipeline executes live:
-     * Equity plunges by 25%, REITs by 15%, Corp bonds by 10%, Gold hedges up 8%.
-     * Mark-to-market value drops: **₹10.00 Cr → ₹8.86 Cr (-₹1.14 Cr loss)**.
-     * Risk status shifts: **WARNING → CRITICAL**.
-     * Active alerts generated in Alert Center.
-     * Automated defensive reallocation calculated to curtail volatility.
-     * Structured 5-point explanation synthesized.
-     * Decision committed to immutable audit history.
-   - Click **Execute Recommended Defensive Rebalance** to apply the fix live.
+VaR / CVaR
 
-4. **Decision History Audit Trail (15s)**:
-   - Open **Decision History**.
-   - Drill into the latest audit entry showing full Before vs After metrics, triggers, and institutional reasoning.
+HHI concentration
 
----
+Optimization constraints
 
-## 11. REST API Reference
+Risk-state transitions
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/health` | System health check (API, DB, Engine, Optimizer) |
-| `GET` | `/api/portfolio` | Full portfolio state, holdings, and risk metrics |
-| `GET` | `/api/assets` | Master list of supported asset classes |
-| `POST` | `/api/optimization` | Execute constrained SLSQP Mean-Variance optimization |
-| `POST` | `/api/rebalance` | Execute simulated portfolio rebalancing order |
-| `GET` | `/api/risk` | 4-factor risk score decomposition and policy bounds |
-| `GET` | `/api/risk/heatmap` | Multi-dimensional asset risk heatmap |
-| `GET` | `/api/risk-policy` | Retrieve centralized institutional risk policy |
-| `PUT` | `/api/risk-policy` | Update policy thresholds |
-| `POST` | `/api/stress-test` | Execute macro scenario or custom asset shocks |
-| `POST` | `/api/market-shock` | **One-click market crash closed-loop demo trigger** |
-| `GET` | `/api/alerts` | Active and historical risk alerts |
-| `PATCH` | `/api/alerts/{id}` | Mark alert resolved |
-| `GET` | `/api/decisions` | Immutable decision audit history |
-| `POST` | `/api/simulation/toggle`| Pause or resume real-time market drift |
-| `POST` | `/api/simulation/reset` | Reset demo portfolio to baseline ₹10 Cr |
+Transaction costs
 
----
+Market-crash closed-loop behavior
 
-## 12. Security & Institutional Governance
+API endpoints
 
-- **Input Validation**: Strongly typed Pydantic models preventing out-of-bounds constraint exploitation.
-- **Data Consistency**: Single unified source of truth across all 10 platform views.
-- **Audit Logging**: Every optimization, shock, and rebalance is permanently timestamped and serialized.
-- **Zero Hallucinated AI**: Real quantitative mathematics drive all calculations; natural language explanations strictly translate structured metrics.
+🎬 2-Minute Hackathon Demo
 
----
+If you are presenting CapitalGuard live, this is the simplest story to tell.
 
-## 13. Regulatory Notice
+1. Start with the portfolio
 
-*CapitalGuard is a financial decision-support and simulation platform developed for institutional demonstration purposes. It does not provide personalized investment advice or execute unverified financial transactions.*
+Show the baseline portfolio and point out the equity concentration above its configured limit.
+
+2. Run optimization
+
+Open Optimization, select Balanced, and run the optimizer.
+
+Show:
+
+Before vs. after allocation
+
+Risk change
+
+Sharpe change
+
+Simulated buy/sell orders
+
+"Why this allocation?" explanation
+
+3. Trigger a market crash
+
+Return to the dashboard and click:
+
+⚡ SIMULATE MARKET CRASH
+
+The system demonstrates:
+
+MARKET SHOCK
+     ↓
+PORTFOLIO IMPACT
+     ↓
+RISK SPIKE
+     ↓
+ALERT
+     ↓
+DEFENSIVE OPTIMIZATION
+     ↓
+EXPLANATION
+     ↓
+DECISION LOG
+
+4. Finish with Decision History
+
+Open Decision History and show the latest event with its trigger, metrics, action, and reasoning.
+
+The key message for judges:
+
+CapitalGuard doesn't just tell you that risk increased. It detects the problem, calculates a constrained response, explains the reasoning, and records what happened.
+
+🔌 REST API
+
+Method
+
+Endpoint
+
+Purpose
+
+GET
+
+/health
+
+Check API, database, engine, and optimizer
+
+GET
+
+/api/portfolio
+
+Portfolio, holdings, and risk metrics
+
+GET
+
+/api/assets
+
+Supported assets
+
+POST
+
+/api/optimization
+
+Run constrained optimization
+
+POST
+
+/api/rebalance
+
+Simulate a rebalance
+
+GET
+
+/api/risk
+
+Risk score and policy information
+
+GET
+
+/api/risk/heatmap
+
+Asset risk heatmap
+
+GET
+
+/api/risk-policy
+
+Read risk policy
+
+PUT
+
+/api/risk-policy
+
+Update risk policy
+
+POST
+
+/api/stress-test
+
+Run a stress scenario
+
+POST
+
+/api/market-shock
+
+Trigger the market-crash demo
+
+GET
+
+/api/alerts
+
+Read alerts
+
+PATCH
+
+/api/alerts/{id}
+
+Resolve an alert
+
+GET
+
+/api/decisions
+
+Read decision history
+
+POST
+
+/api/simulation/toggle
+
+Pause/resume simulation
+
+POST
+
+/api/simulation/reset
+
+Reset the demo portfolio
+
+🔐 Security & Governance
+
+CapitalGuard is designed around transparent and controlled decision support.
+
+Current safeguards include:
+
+Strong Pydantic input validation
+
+Centralized portfolio state
+
+Policy-based risk thresholds
+
+Persistent event logging
+
+Explainable quantitative outputs
+
+No black-box AI used for financial calculations
+
+The natural-language explanation layer translates structured quantitative results rather than inventing financial numbers.
+
+🗺️ Project Structure
+
+capitalguard/
+│
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   └── main.py
+│   ├── tests/
+│   ├── requirements.txt
+│   └── capitalguard.db
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+│
+├── docker-compose.yml
+└── README.md
+
+🔮 What could come next?
+
+The current platform is built as a strong decision-support and simulation foundation. Natural next steps include:
+
+Real Supabase authentication and user accounts
+
+User-specific portfolios and RLS
+
+PostgreSQL production storage
+
+Live market-data providers
+
+More advanced liquidity modelling
+
+Transaction-cost modelling
+
+Portfolio-level scenario libraries
+
+Role-based institutional access
+
+Notification workflows
+
+Cloud deployment
+
+More advanced optimization objectives
+
+These can be added without changing the core closed-loop architecture.
+
+⚠️ Important Note
+
+CapitalGuard is a financial decision-support and simulation platform developed for demonstration and hackathon purposes.
+
+It does not provide personalized investment advice and does not execute real-world financial transactions.
+
+Any simulated allocation, risk metric, market shock, or rebalance should be treated as a demonstration of the platform's methodology—not as a recommendation to invest.
+
+👨‍💻 Built for
+
+INIT'26 Hackathon
+
+CapitalGuard is built around one simple idea:
+
+Better capital decisions come from connecting risk detection, optimization, explainability, and action—not from looking at another dashboard full of numbers.
+
+<p align="center">
+  <b>CapitalGuard</b><br>
+  Smart Capital Allocation • Real-Time Risk Control
+</p>
