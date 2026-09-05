@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Dark theme (default) ────────────────────────────────────────────────── */
+:root,
+.dark {
+  --bg-primary: #060911;
+  --bg-secondary: #0a0e1a;
+  --bg-card: #0f1526;
+  --bg-input: #0a0e1a;
+  --border-color: #141c33;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #6366f1;
+  --accent-bg: rgba(99,102,241,0.15);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+/* ─── Light theme ─────────────────────────────────────────────────────────── */
+.light {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #6366f1;
+  --accent-bg: rgba(99,102,241,0.08);
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+}
+
+/* ─── Base styles ─────────────────────────────────────────────────────────── */
+@layer base {
+  body {
+    @apply bg-obsidian-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-600 selection:text-white;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  .light body,
+  body.light {
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
+/* ─── Light mode overrides for dashboard ─────────────────────────────────── */
+.light .bg-obsidian-950 { background-color: #f8fafc !important; }
+.light .bg-obsidian-900 { background-color: #f1f5f9 !important; }
+.light .bg-obsidian-850 { background-color: #e2e8f0 !important; }
+.light .bg-obsidian-800 { background-color: #cbd5e1 !important; }
+.light .border-obsidian-800 { border-color: #e2e8f0 !important; }
+.light .border-obsidian-700 { border-color: #cbd5e1 !important; }
+.light .text-slate-100 { color: #0f172a !important; }
+.light .text-slate-200 { color: #1e293b !important; }
+.light .text-slate-300 { color: #334155 !important; }
+.light .text-slate-400 { color: #64748b !important; }
+.light .text-slate-500 { color: #94a3b8 !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Utilities */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Loading animation keyframe */
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}

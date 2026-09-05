@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  capitalguard-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: capitalguard-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./capitalguard.db
+      - ENVIRONMENT=production
+      - CORS_ORIGINS=*
+    volumes:
+      - capitalguard_data:/app/backend
+    restart: unless-stopped
+
+volumes:
+  capitalguard_data:
